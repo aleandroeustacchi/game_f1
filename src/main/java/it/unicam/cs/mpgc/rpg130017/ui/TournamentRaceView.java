@@ -120,8 +120,9 @@ public class TournamentRaceView {
 
         Pane pane = new Pane();
         pane.setPrefSize(GAUGE_W, GAUGE_H);
-        pane.setStyle("-fx-background-color: #121216; -fx-border-color: #32323e; " +
-                "-fx-border-width: 2px; -fx-border-radius: 4px; -fx-background-radius: 4px;");
+        pane.setStyle("-fx-background-color: linear-gradient(to right, #121216 0%, #1a1a2e 60%, #3a0000 85%, #ff0055 100%); " +
+                "-fx-border-color: #00f3ff; -fx-border-width: 2px; -fx-border-radius: 4px; -fx-background-radius: 4px; " +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,243,255,0.4), 10, 0, 0, 0);");
 
         // Good zone
         double gs = race.getGoodZoneStart(), ge = race.getGoodZoneEnd();
@@ -253,7 +254,13 @@ public class TournamentRaceView {
         // Player HUD
         playerBar.setProgress(race.getPlayerProgress());
         speedLabel.setText(String.format("%.0f km/h", race.getPlayerSpeed()));
-        gearLabel.setText("GEAR " + race.getPlayerGear());
+        if (race.getPlayerGear() == race.getMaxGears()) {
+            gearLabel.setText("GEAR " + race.getPlayerGear() + " (MAX)");
+            gearLabel.setStyle("-fx-text-fill: #ffd700; -fx-font-weight: bold;");
+        } else {
+            gearLabel.setText("GEAR " + race.getPlayerGear());
+            gearLabel.setStyle("-fx-text-fill: #00f3ff; -fx-font-weight: bold;");
+        }
         feedbackLabel.setText(race.getPlayerFeedback());
 
         double rpm = race.getPlayerRpm();

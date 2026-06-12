@@ -42,6 +42,11 @@ public class Car {
     private Set<String>         ownedFrames   = new HashSet<>();
     private Map<String, Integer> frameLevels  = new HashMap<>();
 
+    // --- Transmission ---
+    private TransmissionType equippedTransmission = TransmissionType.SPEED_5_RACE;
+    private Set<String>         ownedTransmissions    = new HashSet<>();
+    private Map<String, Integer> transmissionLevels   = new HashMap<>();
+
     public Car() {
         // Player starts owning the base tier of everything at level 0
         ownedEngines.add(EngineType.V6.name());
@@ -55,6 +60,9 @@ public class Car {
 
         ownedFrames.add(FrameType.STOCK.name());
         frameLevels.put(FrameType.STOCK.name(), 0);
+
+        ownedTransmissions.add(TransmissionType.SPEED_5_RACE.name());
+        transmissionLevels.put(TransmissionType.SPEED_5_RACE.name(), 0);
     }
 
     /**
@@ -76,9 +84,11 @@ public class Car {
     public double getTopSpeed() {
         int eLevel = getEngineLevel(equippedEngine);
         int nLevel = getNitroLevel(equippedNitro);
+        int trLevel = getTransmissionLevel(equippedTransmission);
         return baseTopSpeed
                 + equippedEngine.getTopSpeedBonus() + eLevel * 8.0
-                + equippedNitro.getTopSpeedBonus()  + nLevel * 4.0;
+                + equippedNitro.getTopSpeedBonus()  + nLevel * 4.0
+                + equippedTransmission.getTopSpeedBonus() + trLevel * 3.0;
     }
 
     public double getAcceleration() {
@@ -86,6 +96,7 @@ public class Car {
         int tLevel = getTireLevel(equippedTires);
         int nLevel = getNitroLevel(equippedNitro);
         int fLevel = getFrameLevel(equippedFrame);
+        int trLevel = getTransmissionLevel(equippedTransmission);
         double weightMod = getWeight() / 160.0;
         return Math.max(2.0,
                 baseAcceleration
@@ -93,6 +104,7 @@ public class Car {
                 + equippedTires.getAccelBonus()  + tLevel * 1.5
                 + equippedNitro.getAccelBonus()  + nLevel * 2.0
                 + equippedFrame.getAccelBonus()  + fLevel * 1.0
+                + equippedTransmission.getAccelBonus() + trLevel * 0.5
                 - weightMod);
     }
 
@@ -105,6 +117,10 @@ public class Car {
         int fLevel = getFrameLevel(equippedFrame);
         return Math.max(700.0,
                 baseWeight + equippedFrame.getWeightReduction() - fLevel * 60.0);
+    }
+
+    public int getMaxGears() {
+        return equippedTransmission.getMaxGears();
     }
 
     // ============================================================
@@ -123,12 +139,16 @@ public class Car {
     public int getFrameLevel(FrameType type) {
         return frameLevels.getOrDefault(type.name(), 0);
     }
+    public int getTransmissionLevel(TransmissionType type) {
+        return transmissionLevels.getOrDefault(type.name(), 0);
+    }
 
     /** Convenience – level of the currently equipped engine */
     public int getEngineLevel()  { return getEngineLevel(equippedEngine); }
     public int getTiresLevel()   { return getTireLevel(equippedTires); }
     public int getNitroLevel()   { return getNitroLevel(equippedNitro); }
     public int getWeightReductionLevel() { return getFrameLevel(equippedFrame); }
+    public int getTransmissionLevel() { return getTransmissionLevel(equippedTransmission); }
 
     // ============================================================
     //  OWNERSHIP CHECKS
@@ -138,6 +158,7 @@ public class Car {
     public boolean ownsTires(TireType t)    { return ownedTires.contains(t.name()); }
     public boolean ownsNitro(NitroType t)   { return ownedNitros.contains(t.name()); }
     public boolean ownsFrame(FrameType t)   { return ownedFrames.contains(t.name()); }
+    public boolean ownsTransmission(TransmissionType t) { return ownedTransmissions.contains(t.name()); }
 
     // ============================================================
     //  BUY (add to inventory)
@@ -159,6 +180,10 @@ public class Car {
         ownedFrames.add(t.name());
         frameLevels.putIfAbsent(t.name(), 0);
     }
+    public void buyTransmission(TransmissionType t) {
+        ownedTransmissions.add(t.name());
+        transmissionLevels.putIfAbsent(t.name(), 0);
+    }
 
     // ============================================================
     //  UPGRADE (increment level of currently equipped part)
@@ -175,6 +200,9 @@ public class Car {
     }
     public void upgradeFrame() {
         frameLevels.merge(equippedFrame.name(), 1, Integer::sum);
+    }
+    public void upgradeTransmission() {
+        transmissionLevels.merge(equippedTransmission.name(), 1, Integer::sum);
     }
 
     // ============================================================
@@ -193,6 +221,9 @@ public class Car {
     public void equipFrame(FrameType t) {
         if (ownedFrames.contains(t.name())) equippedFrame = t;
     }
+    public void equipTransmission(TransmissionType t) {
+        if (ownedTransmissions.contains(t.name())) equippedTransmission = t;
+    }
 
     // ============================================================
     //  GETTERS / SETTERS (for Jackson serialization)
@@ -210,6 +241,9 @@ public class Car {
     public FrameType getEquippedFrame()    { return equippedFrame; }
     public void setEquippedFrame(FrameType f){ this.equippedFrame = f; }
 
+    public TransmissionType getEquippedTransmission()    { return equippedTransmission; }
+    public void setEquippedTransmission(TransmissionType t){ this.equippedTransmission = t; }
+
     public Set<String> getOwnedEngines()  { return ownedEngines; }
     public void setOwnedEngines(Set<String> s){ this.ownedEngines = s; }
 
@@ -222,6 +256,9 @@ public class Car {
     public Set<String> getOwnedFrames()   { return ownedFrames; }
     public void setOwnedFrames(Set<String> s){ this.ownedFrames = s; }
 
+    public Set<String> getOwnedTransmissions()   { return ownedTransmissions; }
+    public void setOwnedTransmissions(Set<String> s){ this.ownedTransmissions = s; }
+
     public Map<String, Integer> getEngineLevels() { return engineLevels; }
     public void setEngineLevels(Map<String, Integer> m){ this.engineLevels = m; }
 
@@ -233,6 +270,9 @@ public class Car {
 
     public Map<String, Integer> getFrameLevels()  { return frameLevels; }
     public void setFrameLevels(Map<String, Integer> m){ this.frameLevels = m; }
+
+    public Map<String, Integer> getTransmissionLevels()  { return transmissionLevels; }
+    public void setTransmissionLevels(Map<String, Integer> m){ this.transmissionLevels = m; }
 
     public double getBaseTopSpeed()      { return baseTopSpeed; }
     public void setBaseTopSpeed(double v){ this.baseTopSpeed = v; }

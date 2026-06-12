@@ -14,7 +14,10 @@ public class DragRaceMode implements RaceMode {
     private final Racer  opponent;
     private static final double TOTAL_DISTANCE = 402.33; // quarter mile (m)
 
-    private static final double[] GEAR_SPEED_CAPS = { 0.20, 0.38, 0.57, 0.78, 1.00 };
+    private double getGearCap(int currentGear, int maxGears) {
+        if (currentGear >= maxGears) return 1.0;
+        return Math.pow((double) currentGear / maxGears, 0.9);
+    }
 
     // ── Player state ──────────────────────────────────────────────────────
     private double playerDistance = 0;
@@ -74,18 +77,26 @@ public class DragRaceMode implements RaceMode {
         if (feedbackTimer > 0 && (feedbackTimer -= dt) <= 0) playerFeedback = "";
 
         // ── Player ──────────────────────────────────────────────────────
+        int pMaxGears = player.getCar().getMaxGears();
         double pMax = player.getCar().getTopSpeed() / 3.6;
-        double pMaxGear = pMax * GEAR_SPEED_CAPS[playerGear - 1];
+        double pMaxGear = pMax * getGearCap(playerGear, pMaxGears);
 
-        double rpmRate = (0.75 / (playerGear * 0.4 + 0.6))
-                * (1.0 - playerSpeed / (pMax + 15.0));
-        rpmRate = Math.max(0.08, rpmRate);
-        playerRpm = Math.min(1.0, playerRpm + rpmRate * dt);
+        if (playerGear == pMaxGears) {
+            // Top gear logic: float RPM around 70-85%, reduce accel gradually
+            double speedRatio = playerSpeed / pMax;
+            playerRpm = 0.65 + 0.20 * speedRatio;
+            playerAccelMod = Math.max(0.1, 1.0 - Math.pow(speedRatio, 3));
+        } else {
+            double rpmRate = (0.75 / (playerGear * 0.4 + 0.6))
+                    * (1.0 - playerSpeed / (pMax + 15.0));
+            rpmRate = Math.max(0.08, rpmRate);
+            playerRpm = Math.min(1.0, playerRpm + rpmRate * dt);
 
-        if (playerRpm >= 1.0) {
-            playerAccelMod = 0.25;
-            playerFeedback = "REDLINE!";
-            feedbackTimer  = 0.3;
+            if (playerRpm >= 1.0) {
+                playerAccelMod = 0.25;
+                playerFeedback = "REDLINE!";
+                feedbackTimer  = 0.3;
+            }
         }
 
         double pAccel = player.getCar().getAcceleration() * playerAccelMod;
@@ -93,15 +104,22 @@ public class DragRaceMode implements RaceMode {
         playerDistance += playerSpeed * dt;
 
         // ── Opponent ─────────────────────────────────────────────────────
+        int oMaxGears = opponent.getCar().getMaxGears();
         double oMax    = opponent.getCar().getTopSpeed() / 3.6;
-        double oMaxGear = oMax * GEAR_SPEED_CAPS[opponentGear - 1];
+        double oMaxGear = oMax * getGearCap(opponentGear, oMaxGears);
 
-        double oRpm = (0.75 / (opponentGear * 0.4 + 0.6))
-                * (1.0 - opponentSpeed / (oMax + 15.0));
-        oRpm = Math.max(0.08, oRpm);
-        opponentRpm = Math.min(1.0, opponentRpm + oRpm * dt);
+        if (opponentGear == oMaxGears) {
+            double speedRatio = opponentSpeed / oMax;
+            opponentRpm = 0.65 + 0.20 * speedRatio;
+            opponentAccelMod = Math.max(0.1, 1.0 - Math.pow(speedRatio, 3));
+        } else {
+            double oRpm = (0.75 / (opponentGear * 0.4 + 0.6))
+                    * (1.0 - opponentSpeed / (oMax + 15.0));
+            oRpm = Math.max(0.08, oRpm);
+            opponentRpm = Math.min(1.0, opponentRpm + oRpm * dt);
 
-        if (opponentRpm >= opponentShiftTarget || opponentRpm >= 1.0) shiftOpponent();
+            if (opponentRpm >= opponentShiftTarget || opponentRpm >= 1.0) shiftOpponent();
+        }
 
         double oAccel = opponent.getCar().getAcceleration() * opponentAccelMod;
         opponentSpeed = Math.min(oMaxGear, opponentSpeed + oAccel * dt);
@@ -125,7 +143,8 @@ public class DragRaceMode implements RaceMode {
         else                                                              { playerFeedback = "BAD SHIFT!";     playerAccelMod = 0.55; }
 
         feedbackTimer = 1.0;
-        if (playerGear < 5) playerGear++;
+        int pMaxGears = player.getCar().getMaxGears();
+        if (playerGear < pMaxGears) playerGear++;
         playerRpm = 0.22;
     }
 
@@ -134,7 +153,8 @@ public class DragRaceMode implements RaceMode {
         else if (opponentRpm >= GOOD_START    && opponentRpm <= GOOD_END)    opponentAccelMod = 1.05;
         else                                                                  opponentAccelMod = 0.6;
 
-        if (opponentGear < 5) opponentGear++;
+        int oMaxGears = opponent.getCar().getMaxGears();
+        if (opponentGear < oMaxGears) opponentGear++;
         opponentRpm = 0.22;
         pickOpponentShiftPoint();
     }
@@ -146,6 +166,7 @@ public class DragRaceMode implements RaceMode {
     @Override public double getOpponentSpeed()    { return opponentSpeed * 3.6; }
     @Override public int    getPlayerGear()       { return playerGear; }
     @Override public int    getOpponentGear()     { return opponentGear; }
+    public int getMaxGears() { return player.getCar().getMaxGears(); }
     @Override public double getPlayerRpm()        { return playerRpm; }
     @Override public double getPerfectZoneStart() { return PERFECT_START; }
     @Override public double getPerfectZoneEnd()   { return PERFECT_END; }

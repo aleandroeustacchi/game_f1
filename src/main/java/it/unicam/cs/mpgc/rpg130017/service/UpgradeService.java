@@ -29,6 +29,12 @@ public class UpgradeService {
         if (p.spendMoney(cost)) { p.getCar().upgradeFrame(); return true; }
         return false;
     }
+    public boolean upgradeTransmission(Player p) {
+        int level = p.getCar().getTransmissionLevel();
+        int cost  = upgradeCost(level);
+        if (p.spendMoney(cost)) { p.getCar().upgradeTransmission(); return true; }
+        return false;
+    }
 
     /** Exponential cost per level: 500, 840, 1299, 1892 … */
     public int upgradeCost(int currentLevel) {
@@ -64,6 +70,13 @@ public class UpgradeService {
         p.getCar().buyFrame(type);
         return true;
     }
+    public boolean buyTransmissionType(Player p, TransmissionType type) {
+        if (p.getCar().ownsTransmission(type)) return false;
+        if (p.getCar().getTransmissionLevel() < type.getUnlockLevel()) return false;
+        if (!p.spendMoney(type.getPurchaseCost())) return false;
+        p.getCar().buyTransmission(type);
+        return true;
+    }
 
     // ── Equip an owned component ───────────────────────────────────────────
     public boolean equipEngine(Player p, EngineType type) {
@@ -81,5 +94,9 @@ public class UpgradeService {
     public boolean equipFrame(Player p, FrameType type) {
         if (!p.getCar().ownsFrame(type)) return false;
         p.getCar().equipFrame(type); return true;
+    }
+    public boolean equipTransmission(Player p, TransmissionType type) {
+        if (!p.getCar().ownsTransmission(type)) return false;
+        p.getCar().equipTransmission(type); return true;
     }
 }

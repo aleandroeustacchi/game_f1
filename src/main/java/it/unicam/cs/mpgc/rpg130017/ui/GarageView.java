@@ -184,6 +184,13 @@ public class GarageView {
                 car.getEquippedFrame().getDisplayName() + "  Lvl " + fLvl,
                 "Upgrade  $" + fCost,
                 () -> { svc.upgradeFrame(p); refresh(); }));
+
+        // Transmission
+        int trLvl = car.getTransmissionLevel(); int trCost = svc.upgradeCost(trLvl);
+        rightContent.getChildren().add(upgradeRow(
+                car.getEquippedTransmission().getDisplayName() + "  Lvl " + trLvl,
+                "Upgrade  $" + trCost,
+                () -> { svc.upgradeTransmission(p); refresh(); }));
     }
 
     private HBox upgradeRow(String partName, String btnLabel, Runnable action) {
@@ -263,6 +270,19 @@ public class GarageView {
             rightContent.getChildren().add(shopRow(info, "BUY  $" + t.getPurchaseCost(),
                     owned, canBuy, () -> { svc.buyFrameType(p, t); refresh(); }));
         }
+
+        // Transmission
+        rightContent.getChildren().add(sectionHeader("TRANSMISSION"));
+        for (TransmissionType t : TransmissionType.values()) {
+            if (t == TransmissionType.SPEED_5_RACE) continue;
+            boolean owned  = p.getCar().ownsTransmission(t);
+            boolean canBuy = !owned && p.getCar().getTransmissionLevel() >= t.getUnlockLevel();
+            String info = t.getDisplayName() + " — " + t.getDescription()
+                    + (owned ? " [OWNED]" : "  $" + t.getPurchaseCost())
+                    + "  unlock: Trans. Lvl " + t.getUnlockLevel();
+            rightContent.getChildren().add(shopRow(info, "BUY  $" + t.getPurchaseCost(),
+                    owned, canBuy, () -> { svc.buyTransmissionType(p, t); refresh(); }));
+        }
     }
 
     private Label sectionHeader(String text) {
@@ -339,6 +359,16 @@ public class GarageView {
             rightContent.getChildren().add(equipRow(
                     t.getDisplayName() + "  Lvl " + lvl + "  " + t.getDescription(),
                     eq, () -> { svc.equipFrame(p, t); refresh(); }));
+        }
+
+        rightContent.getChildren().add(sectionHeader("TRANSMISSION"));
+        for (TransmissionType t : TransmissionType.values()) {
+            if (!car.ownsTransmission(t)) continue;
+            boolean eq = car.getEquippedTransmission() == t;
+            int lvl = car.getTransmissionLevel(t);
+            rightContent.getChildren().add(equipRow(
+                    t.getDisplayName() + "  Lvl " + lvl + "  " + t.getDescription(),
+                    eq, () -> { svc.equipTransmission(p, t); refresh(); }));
         }
     }
 

@@ -9,7 +9,11 @@ import java.util.*;
 public class TournamentRaceMode implements RaceMode {
 
     private static final double TOTAL_DISTANCE = 402.33;
-    private static final double[] GEAR_CAPS    = { 0.20, 0.38, 0.57, 0.78, 1.00 };
+
+    private double getGearCap(int currentGear, int maxGears) {
+        if (currentGear >= maxGears) return 1.0;
+        return Math.pow((double) currentGear / maxGears, 0.9);
+    }
     private static final double PERFECT_START  = 0.70;
     private static final double PERFECT_END    = 0.82;
     private static final double GOOD_START     = 0.55;
@@ -70,25 +74,40 @@ public class TournamentRaceMode implements RaceMode {
         if (feedbackTimer > 0 && (feedbackTimer -= dt) <= 0) playerFeedback = "";
 
         // ── Player ──────────────────────────────────────────────────────
+        int pMaxGears = player.getCar().getMaxGears();
         double pMax    = player.getCar().getTopSpeed() / 3.6;
-        double pCapGear = pMax * GEAR_CAPS[playerGear - 1];
-        double rpmRate  = Math.max(0.08,
-                (0.75 / (playerGear * 0.4 + 0.6)) * (1 - playerSpeed / (pMax + 15)));
-        playerRpm = Math.min(1.0, playerRpm + rpmRate * dt);
-        if (playerRpm >= 1.0) { playerAccelMod = 0.25; playerFeedback = "REDLINE!"; feedbackTimer = 0.3; }
+        double pCapGear = pMax * getGearCap(playerGear, pMaxGears);
+
+        if (playerGear == pMaxGears) {
+            double speedRatio = playerSpeed / pMax;
+            playerRpm = 0.65 + 0.20 * speedRatio;
+            playerAccelMod = Math.max(0.1, 1.0 - Math.pow(speedRatio, 3));
+        } else {
+            double rpmRate  = Math.max(0.08,
+                    (0.75 / (playerGear * 0.4 + 0.6)) * (1 - playerSpeed / (pMax + 15)));
+            playerRpm = Math.min(1.0, playerRpm + rpmRate * dt);
+            if (playerRpm >= 1.0) { playerAccelMod = 0.25; playerFeedback = "REDLINE!"; feedbackTimer = 0.3; }
+        }
         playerSpeed    = Math.min(pCapGear, playerSpeed + player.getCar().getAcceleration() * playerAccelMod * dt);
         playerDistance += playerSpeed * dt;
 
         // ── AI ───────────────────────────────────────────────────────────
         for (int i = 0; i < opponents.size(); i++) {
             Car    car    = opponents.get(i).getCar();
+            int    oMaxGears = car.getMaxGears();
             double oMax   = car.getTopSpeed() / 3.6;
-            double oCapGear = oMax * GEAR_CAPS[aiGear[i] - 1];
+            double oCapGear = oMax * getGearCap(aiGear[i], oMaxGears);
 
-            double oRpmRate = Math.max(0.08,
-                    (0.75 / (aiGear[i] * 0.4 + 0.6)) * (1 - aiSpeed[i] / (oMax + 15)));
-            aiRpm[i] = Math.min(1.0, aiRpm[i] + oRpmRate * dt);
-            if (aiRpm[i] >= aiShiftTarget[i] || aiRpm[i] >= 1.0) shiftAi(i);
+            if (aiGear[i] == oMaxGears) {
+                double speedRatio = aiSpeed[i] / oMax;
+                aiRpm[i] = 0.65 + 0.20 * speedRatio;
+                aiAccelMod[i] = Math.max(0.1, 1.0 - Math.pow(speedRatio, 3));
+            } else {
+                double oRpmRate = Math.max(0.08,
+                        (0.75 / (aiGear[i] * 0.4 + 0.6)) * (1 - aiSpeed[i] / (oMax + 15)));
+                aiRpm[i] = Math.min(1.0, aiRpm[i] + oRpmRate * dt);
+                if (aiRpm[i] >= aiShiftTarget[i] || aiRpm[i] >= 1.0) shiftAi(i);
+            }
 
             aiSpeed[i] = Math.min(oCapGear, aiSpeed[i] + car.getAcceleration() * aiAccelMod[i] * dt);
             aiDist[i] += aiSpeed[i] * dt;
@@ -114,7 +133,8 @@ public class TournamentRaceMode implements RaceMode {
         if      (rpm >= PERFECT_START && rpm <= PERFECT_END) aiAccelMod[i] = 1.25;
         else if (rpm >= GOOD_START    && rpm <= GOOD_END)    aiAccelMod[i] = 1.05;
         else                                                  aiAccelMod[i] = 0.6;
-        if (aiGear[i] < 5) aiGear[i]++;
+        int oMaxGears = opponents.get(i).getCar().getMaxGears();
+        if (aiGear[i] < oMaxGears) aiGear[i]++;
         aiRpm[i] = 0.22;
         pickAiShiftPoint(i);
     }
@@ -155,6 +175,7 @@ public class TournamentRaceMode implements RaceMode {
     @Override public double getOpponentSpeed()    { return aiSpeed.length > 0 ? aiSpeed[0] * 3.6 : 0; }
     @Override public int    getPlayerGear()       { return playerGear; }
     @Override public int    getOpponentGear()     { return aiGear.length > 0 ? aiGear[0] : 1; }
+    public int getMaxGears() { return player.getCar().getMaxGears(); }
     @Override public double getPlayerRpm()        { return playerRpm; }
     @Override public double getPerfectZoneStart() { return PERFECT_START; }
     @Override public double getPerfectZoneEnd()   { return PERFECT_END; }
@@ -172,7 +193,8 @@ public class TournamentRaceMode implements RaceMode {
         else if (playerRpm >= GOOD_START    && playerRpm <= GOOD_END)    { playerFeedback = "GOOD SHIFT!";    playerAccelMod = 1.1; }
         else                                                              { playerFeedback = "BAD SHIFT!";     playerAccelMod = 0.55; }
         feedbackTimer = 1.0;
-        if (playerGear < 5) playerGear++;
+        int pMaxGears = player.getCar().getMaxGears();
+        if (playerGear < pMaxGears) playerGear++;
         playerRpm = 0.22;
     }
 }

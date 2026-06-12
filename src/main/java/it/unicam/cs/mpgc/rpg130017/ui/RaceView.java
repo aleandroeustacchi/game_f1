@@ -152,7 +152,9 @@ public class RaceView {
         rpmGaugeContainer.setMaxWidth(GAUGE_WIDTH);
         rpmGaugeContainer.setPrefWidth(GAUGE_WIDTH);
         rpmGaugeContainer.setPrefHeight(GAUGE_HEIGHT);
-        rpmGaugeContainer.setStyle("-fx-background-color: #121216; -fx-border-color: #32323e; -fx-border-width: 2px; -fx-border-radius: 4px; -fx-background-radius: 4px;");
+        rpmGaugeContainer.setStyle("-fx-background-color: linear-gradient(to right, #121216 0%, #1a1a2e 60%, #3a0000 85%, #ff0055 100%); " +
+                "-fx-border-color: #00f3ff; -fx-border-width: 2px; -fx-border-radius: 4px; -fx-background-radius: 4px; " +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,243,255,0.4), 10, 0, 0, 0);");
 
         // 1. Draw Good Zone Rect
         double goodStartVal = race.getGoodZoneStart();
@@ -280,7 +282,13 @@ public class RaceView {
                 // Update UI Telemetry
                 playerProgress.setProgress(race.getPlayerProgress());
                 playerSpeedLabel.setText(String.format("%.0f km/h", race.getPlayerSpeed()));
-                playerGearLabel.setText("GEAR " + race.getPlayerGear());
+                if (race.getPlayerGear() == race.getMaxGears()) {
+                    playerGearLabel.setText("GEAR " + race.getPlayerGear() + " (MAX)");
+                    playerGearLabel.setStyle("-fx-text-fill: #ffd700; -fx-font-weight: bold;");
+                } else {
+                    playerGearLabel.setText("GEAR " + race.getPlayerGear());
+                    playerGearLabel.setStyle("-fx-text-fill: #00f3ff; -fx-font-weight: bold;");
+                }
 
                 opponentProgress.setProgress(race.getOpponentProgress());
                 opponentSpeedLabel.setText(String.format("%.0f km/h", race.getOpponentSpeed()));

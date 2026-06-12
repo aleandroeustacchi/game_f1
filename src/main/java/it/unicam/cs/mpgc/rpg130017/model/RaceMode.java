@@ -13,6 +13,7 @@ public interface RaceMode {
     
     int getPlayerGear();
     int getOpponentGear();
+    int getMaxGears();
     
     double getPlayerRpm(); // 0.0 to 1.0
     double getPerfectZoneStart();

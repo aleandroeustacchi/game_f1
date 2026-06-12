@@ -21,18 +21,21 @@ public class GameState {
     private String equippedTires  = TireType.STREET.name();
     private String equippedNitro  = NitroType.BASIC.name();
     private String equippedFrame  = FrameType.STOCK.name();
+    private String equippedTransmission = TransmissionType.SPEED_5_RACE.name();
 
     // Owned inventory
     private Set<String> ownedEngines = new HashSet<>();
     private Set<String> ownedTires   = new HashSet<>();
     private Set<String> ownedNitros  = new HashSet<>();
     private Set<String> ownedFrames  = new HashSet<>();
+    private Set<String> ownedTransmissions = new HashSet<>();
 
     // Per-type upgrade levels
     private Map<String, Integer> engineLevels = new HashMap<>();
     private Map<String, Integer> tireLevels   = new HashMap<>();
     private Map<String, Integer> nitroLevels  = new HashMap<>();
     private Map<String, Integer> frameLevels  = new HashMap<>();
+    private Map<String, Integer> transmissionLevels = new HashMap<>();
 
     public GameState() {}
 
@@ -51,16 +54,19 @@ public class GameState {
         s.equippedTires  = car.getEquippedTires().name();
         s.equippedNitro  = car.getEquippedNitro().name();
         s.equippedFrame  = car.getEquippedFrame().name();
+        s.equippedTransmission = car.getEquippedTransmission().name();
 
         s.ownedEngines = new HashSet<>(car.getOwnedEngines());
         s.ownedTires   = new HashSet<>(car.getOwnedTires());
         s.ownedNitros  = new HashSet<>(car.getOwnedNitros());
         s.ownedFrames  = new HashSet<>(car.getOwnedFrames());
+        s.ownedTransmissions = new HashSet<>(car.getOwnedTransmissions());
 
         s.engineLevels = new HashMap<>(car.getEngineLevels());
         s.tireLevels   = new HashMap<>(car.getTireLevels());
         s.nitroLevels  = new HashMap<>(car.getNitroLevels());
         s.frameLevels  = new HashMap<>(car.getFrameLevels());
+        s.transmissionLevels = new HashMap<>(car.getTransmissionLevels());
 
         return s;
     }
@@ -77,18 +83,21 @@ public class GameState {
         car.setOwnedTires(new HashSet<>(this.ownedTires));
         car.setOwnedNitros(new HashSet<>(this.ownedNitros));
         car.setOwnedFrames(new HashSet<>(this.ownedFrames));
+        car.setOwnedTransmissions(new HashSet<>(this.ownedTransmissions));
 
         // Restore levels
         car.setEngineLevels(new HashMap<>(this.engineLevels));
         car.setTireLevels(new HashMap<>(this.tireLevels));
         car.setNitroLevels(new HashMap<>(this.nitroLevels));
         car.setFrameLevels(new HashMap<>(this.frameLevels));
+        car.setTransmissionLevels(new HashMap<>(this.transmissionLevels));
 
         // Restore equipped
         try { car.equipEngine(EngineType.valueOf(this.equippedEngine)); } catch (Exception ignored) {}
         try { car.equipTires(TireType.valueOf(this.equippedTires));     } catch (Exception ignored) {}
         try { car.equipNitro(NitroType.valueOf(this.equippedNitro));    } catch (Exception ignored) {}
         try { car.equipFrame(FrameType.valueOf(this.equippedFrame));     } catch (Exception ignored) {}
+        try { car.equipTransmission(TransmissionType.valueOf(this.equippedTransmission)); } catch (Exception ignored) {}
 
         player.setCar(car);
         return player;
@@ -148,4 +157,13 @@ public class GameState {
 
     public Map<String, Integer> getFrameLevels()       { return frameLevels; }
     public void setFrameLevels(Map<String, Integer> v) { this.frameLevels = v; }
+
+    public String getEquippedTransmission()          { return equippedTransmission; }
+    public void   setEquippedTransmission(String v)  { this.equippedTransmission = v; }
+
+    public Set<String> getOwnedTransmissions()       { return ownedTransmissions; }
+    public void setOwnedTransmissions(Set<String> v) { this.ownedTransmissions = v; }
+
+    public Map<String, Integer> getTransmissionLevels()       { return transmissionLevels; }
+    public void setTransmissionLevels(Map<String, Integer> v) { this.transmissionLevels = v; }
 }
