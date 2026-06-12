@@ -4,47 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="153c3373-2046-4658-b222-bcfcdd69a081" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WIKI.md" beforeDir="false" afterPath="$PROJECT_DIR$/WIKI.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/launcher/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/launcher/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/launcher/MainApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/launcher/MainApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/BossRacer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/BossRacer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/Car.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/Car.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/DragRaceMode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/DragRaceMode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/EngineType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/EngineType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/FrameType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/FrameType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/GameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/GameState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/NitroType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/NitroType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/RaceMode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/RaceMode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/Racer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/Racer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/TireType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/TireType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/TournamentRaceMode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/TournamentRaceMode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/Upgrade.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/model/Upgrade.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/persistence/JsonSaveRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/persistence/JsonSaveRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/persistence/SaveRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/persistence/SaveRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/service/ProgressionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/service/ProgressionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/service/RaceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/service/RaceService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/service/SaveGameService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/service/SaveGameService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/service/UpgradeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/service/UpgradeService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/ui/GarageView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/ui/GarageView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/ui/MainMenuView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/ui/MainMenuView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/ui/RaceView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/ui/RaceView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/ui/ResultsView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/ui/ResultsView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/ui/TournamentRaceView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/unicam/cs/mpgc/rpg130017/ui/TournamentRaceView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/it/unicam/cs/mpgc/rpg130017/JsonSaveRepositoryTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/it/unicam/cs/mpgc/rpg130017/JsonSaveRepositoryTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/it/unicam/cs/mpgc/rpg130017/UpgradeServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/it/unicam/cs/mpgc/rpg130017/UpgradeServiceTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="153c3373-2046-4658-b222-bcfcdd69a081" name="Changes" comment="innit" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -85,6 +45,10 @@
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/ziden/Downloads/rp_game-bf37805a9d31e113ea1b3044e9d1d88c08fe8796",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
     "vue.rearranger.settings.migration": "true"
@@ -108,11 +72,24 @@
       <updated>1780937373828</updated>
       <workItem from="1780937374934" duration="68000" />
       <workItem from="1780937479221" duration="64000" />
-      <workItem from="1781274964654" duration="230000" />
+      <workItem from="1781274964654" duration="480000" />
     </task>
+    <task id="LOCAL-00001" summary="innit">
+      <option name="closed" value="true" />
+      <created>1781275319743</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1781275319743</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="innit" />
+    <option name="LAST_COMMIT_MESSAGE" value="innit" />
   </component>
 </project>
