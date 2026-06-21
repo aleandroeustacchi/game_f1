@@ -44,6 +44,11 @@ public class DragRaceMode implements RaceMode {
 
     private boolean finished     = false;
     private boolean playerWinner = false;
+    private boolean started      = false;
+    private boolean falseStart   = false;
+    private double  greenTime    = 0;
+    private double  opponentGreenTime = 0;
+    private double  opponentReactionTarget = 0.3;
     private final Random random  = new Random();
 
     public DragRaceMode(Player player, Racer opponent) {
@@ -55,11 +60,15 @@ public class DragRaceMode implements RaceMode {
     public void start() {
         playerDistance = opponentDistance = 0;
         playerSpeed    = opponentSpeed    = 0;
-        playerGear     = opponentGear     = 1;
-        playerRpm      = opponentRpm      = 0;
+        playerGear     = opponentGear     = 0;
+        playerRpm      = opponentRpm      = 0.15;
         playerAccelMod = opponentAccelMod = 1.0;
-        playerFeedback = "READY... GO!";
-        feedbackTimer  = 1.5;
+        playerFeedback = "WAIT FOR GREEN...";
+        feedbackTimer  = 0;
+        started = false;
+        falseStart = false;
+        greenTime = opponentGreenTime = 0;
+        opponentReactionTarget = 0.2 + random.nextDouble() * 0.4;
         finished = playerWinner = false;
         pickOpponentShiftPoint();
     }
@@ -73,6 +82,14 @@ public class DragRaceMode implements RaceMode {
     public void update(double dt) {
         if (finished) return;
 
+        if (!started) {
+            // Idle revving
+            playerRpm = 0.15 + random.nextDouble() * 0.05;
+            opponentRpm = 0.15 + random.nextDouble() * 0.05;
+            if (feedbackTimer > 0 && (feedbackTimer -= dt) <= 0) playerFeedback = "";
+            return;
+        }
+
         // Feedback timer
         if (feedbackTimer > 0 && (feedbackTimer -= dt) <= 0) playerFeedback = "";
 
@@ -81,7 +98,18 @@ public class DragRaceMode implements RaceMode {
         double pMax = player.getCar().getTopSpeed() / 3.6;
         double pMaxGear = pMax * getGearCap(playerGear, pMaxGears);
 
-        if (playerGear == pMaxGears) {
+        if (playerGear == 0) {
+            greenTime += dt;
+            if (falseStart && greenTime > 0.0) {
+                playerFeedback = "BAD START!";
+                playerAccelMod = 0.6;
+                feedbackTimer = 1.5;
+                playerGear = 1;
+                playerRpm = 0.2;
+            } else {
+                playerRpm = 0.15 + random.nextDouble() * 0.05;
+            }
+        } else if (playerGear == pMaxGears) {
             // Top gear logic: float RPM around 70-85%, reduce accel gradually
             double speedRatio = playerSpeed / pMax;
             playerRpm = 0.65 + 0.20 * speedRatio;
@@ -99,16 +127,29 @@ public class DragRaceMode implements RaceMode {
             }
         }
 
-        double pAccel = player.getCar().getAcceleration() * playerAccelMod;
-        playerSpeed = Math.min(pMaxGear, playerSpeed + pAccel * dt);
-        playerDistance += playerSpeed * dt;
+        if (playerGear > 0) {
+            double pAccel = player.getCar().getAcceleration() * playerAccelMod;
+            playerSpeed = Math.min(pMaxGear, playerSpeed + pAccel * dt);
+            playerDistance += playerSpeed * dt;
+        }
 
         // ── Opponent ─────────────────────────────────────────────────────
         int oMaxGears = opponent.getCar().getMaxGears();
         double oMax    = opponent.getCar().getTopSpeed() / 3.6;
         double oMaxGear = oMax * getGearCap(opponentGear, oMaxGears);
 
-        if (opponentGear == oMaxGears) {
+        if (opponentGear == 0) {
+            opponentGreenTime += dt;
+            if (opponentGreenTime >= opponentReactionTarget) {
+                opponentGear = 1;
+                opponentRpm = 0.3;
+                if (opponentReactionTarget < 0.25) opponentAccelMod = 1.25;
+                else if (opponentReactionTarget < 0.5) opponentAccelMod = 1.05;
+                else opponentAccelMod = 0.8;
+            } else {
+                opponentRpm = 0.15 + random.nextDouble() * 0.05;
+            }
+        } else if (opponentGear == oMaxGears) {
             double speedRatio = opponentSpeed / oMax;
             opponentRpm = 0.65 + 0.20 * speedRatio;
             opponentAccelMod = Math.max(0.1, 1.0 - Math.pow(speedRatio, 3));
@@ -121,9 +162,11 @@ public class DragRaceMode implements RaceMode {
             if (opponentRpm >= opponentShiftTarget || opponentRpm >= 1.0) shiftOpponent();
         }
 
-        double oAccel = opponent.getCar().getAcceleration() * opponentAccelMod;
-        opponentSpeed = Math.min(oMaxGear, opponentSpeed + oAccel * dt);
-        opponentDistance += opponentSpeed * dt;
+        if (opponentGear > 0) {
+            double oAccel = opponent.getCar().getAcceleration() * opponentAccelMod;
+            opponentSpeed = Math.min(oMaxGear, opponentSpeed + oAccel * dt);
+            opponentDistance += opponentSpeed * dt;
+        }
 
         // ── Win check ────────────────────────────────────────────────────
         if (playerDistance >= TOTAL_DISTANCE || opponentDistance >= TOTAL_DISTANCE) {
@@ -137,6 +180,22 @@ public class DragRaceMode implements RaceMode {
     @Override
     public void shiftPlayerGear() {
         if (finished || playerRpm < 0.15) return;
+
+        if (playerGear == 0) {
+            if (!started) {
+                falseStart = true;
+                playerFeedback = "TOO EARLY!";
+                feedbackTimer = 2.0;
+            } else {
+                if (greenTime < 0.25) { playerFeedback = "PERFECT LAUNCH!"; playerAccelMod = 1.35; }
+                else if (greenTime < 0.6) { playerFeedback = "GOOD LAUNCH!"; playerAccelMod = 1.1; }
+                else { playerFeedback = "LATE LAUNCH"; playerAccelMod = 0.8; }
+                feedbackTimer = 1.5;
+                playerGear = 1;
+                playerRpm = 0.3;
+            }
+            return;
+        }
 
         if      (playerRpm >= PERFECT_START && playerRpm <= PERFECT_END) { playerFeedback = "PERFECT SHIFT!"; playerAccelMod = 1.4; }
         else if (playerRpm >= GOOD_START    && playerRpm <= GOOD_END)    { playerFeedback = "GOOD SHIFT!";    playerAccelMod = 1.1; }
@@ -173,7 +232,9 @@ public class DragRaceMode implements RaceMode {
     @Override public double getGoodZoneStart()    { return GOOD_START; }
     @Override public double getGoodZoneEnd()      { return GOOD_END; }
     @Override public boolean isFinished()         { return finished; }
+    @Override public boolean isStarted()          { return started; }
     @Override public boolean isPlayerWinner()     { return playerWinner; }
+    @Override public void setStarted(boolean s)   { this.started = s; }
     @Override public String  getPlayerFeedback()  { return playerFeedback; }
     @Override public String  getModeName()        { return "Drag Race"; }
 }

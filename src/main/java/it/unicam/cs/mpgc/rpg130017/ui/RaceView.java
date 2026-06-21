@@ -26,6 +26,8 @@ public class RaceView {
     private AnimationTimer gameLoop;
     
     // UI Elements
+    private javafx.scene.layout.HBox lightsBox;
+    private javafx.scene.shape.Circle[] f1Lights;
     private Label countdownLabel;
     private Label feedbackLabel;
     
@@ -203,16 +205,26 @@ public class RaceView {
         VBox fbBox = new VBox(5);
         fbBox.setAlignment(Pos.CENTER);
 
+        lightsBox = new HBox(10);
+        lightsBox.setAlignment(Pos.CENTER);
+        f1Lights = new javafx.scene.shape.Circle[5];
+        for (int i = 0; i < 5; i++) {
+            f1Lights[i] = new javafx.scene.shape.Circle(15, Color.web("#222222"));
+            f1Lights[i].setStrokeWidth(2);
+            f1Lights[i].setStroke(Color.web("#111111"));
+            lightsBox.getChildren().add(f1Lights[i]);
+        }
+
         countdownLabel = new Label("GET READY!");
-        countdownLabel.setStyle("-fx-text-fill: #ffd700; -fx-font-size: 28px; -fx-font-weight: bold;");
+        countdownLabel.setStyle("-fx-text-fill: #ffd700; -fx-font-size: 20px; -fx-font-weight: bold;");
 
         feedbackLabel = new Label("");
         feedbackLabel.setStyle("-fx-text-fill: #00f3ff; -fx-font-size: 24px; -fx-font-weight: bold;");
 
-        Label instructions = new Label("PRESS SPACEBAR TO SHIFT GEAR");
+        Label instructions = new Label("PRESS SPACEBAR ON GREEN TO LAUNCH");
         instructions.setStyle("-fx-text-fill: #8a8a99; -fx-font-size: 12px; -fx-font-weight: bold;");
 
-        fbBox.getChildren().addAll(countdownLabel, feedbackLabel, instructions);
+        fbBox.getChildren().addAll(lightsBox, countdownLabel, feedbackLabel, instructions);
         root.getChildren().add(fbBox);
     }
 
@@ -246,18 +258,26 @@ public class RaceView {
 
     public void startRaceCountdown() {
         countdownActive = true;
-        countdownLabel.setText("3...");
+        countdownLabel.setText("WAIT FOR GREEN...");
         
+        startGameLoop(); // Start idle logic immediately
+
         Timeline timeline = new Timeline(
-            new KeyFrame(Duration.seconds(1), e -> countdownLabel.setText("2...")),
-            new KeyFrame(Duration.seconds(2), e -> countdownLabel.setText("1...")),
-            new KeyFrame(Duration.seconds(3), e -> {
+            new KeyFrame(Duration.seconds(1.0), e -> f1Lights[0].setFill(Color.web("#ff0000"))),
+            new KeyFrame(Duration.seconds(1.5), e -> f1Lights[1].setFill(Color.web("#ff0000"))),
+            new KeyFrame(Duration.seconds(2.0), e -> f1Lights[2].setFill(Color.web("#ff0000"))),
+            new KeyFrame(Duration.seconds(2.5), e -> f1Lights[3].setFill(Color.web("#ff0000"))),
+            new KeyFrame(Duration.seconds(3.0), e -> f1Lights[4].setFill(Color.web("#ff0000"))),
+            new KeyFrame(Duration.seconds(3.5 + Math.random() * 1.5), e -> {
+                for (javafx.scene.shape.Circle c : f1Lights) c.setFill(Color.web("#00ff66"));
                 countdownLabel.setText("GO!");
                 countdownActive = false;
-                lastTime = System.nanoTime();
-                startGameLoop();
+                race.setStarted(true);
             }),
-            new KeyFrame(Duration.seconds(4), e -> countdownLabel.setText(""))
+            new KeyFrame(Duration.seconds(6.5), e -> {
+                for (javafx.scene.shape.Circle c : f1Lights) c.setFill(Color.web("#222222"));
+                countdownLabel.setText("");
+            })
         );
         timeline.play();
     }
@@ -294,14 +314,20 @@ public class RaceView {
                 opponentSpeedLabel.setText(String.format("%.0f km/h", race.getOpponentSpeed()));
                 opponentGearLabel.setText("GEAR " + race.getOpponentGear());
 
-                // Update RPM Cursor position
+                // Update RPM Cursor position (Fix bounds)
                 double rpm = race.getPlayerRpm();
-                rpmCursor.setX(GAUGE_WIDTH * rpm);
+                double maxX = GAUGE_WIDTH - rpmCursor.getWidth();
+                rpmCursor.setX(Math.min(rpm * GAUGE_WIDTH, maxX));
                 rpmTextLabel.setText(String.format("RPM: %.0f%%", rpm * 100));
 
                 // Change cursor color based on redline
                 if (rpm >= 0.95) {
-                    rpmCursor.setFill(Color.web("#ff0055"));
+                    // Flash red
+                    if (System.currentTimeMillis() % 200 < 100) {
+                        rpmCursor.setFill(Color.web("#ff0055"));
+                    } else {
+                        rpmCursor.setFill(Color.web("#ffffff"));
+                    }
                 } else if (rpm >= race.getPerfectZoneStart() && rpm <= race.getPerfectZoneEnd()) {
                     rpmCursor.setFill(Color.web("#00ff66"));
                 } else {

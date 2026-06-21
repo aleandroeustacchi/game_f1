@@ -2,6 +2,8 @@ package it.unicam.cs.mpgc.rpg130017.model;
 
 public interface RaceMode {
     void start();
+    boolean isStarted();
+    void setStarted(boolean started);
     void update(double deltaTime);
     void shiftPlayerGear();
     

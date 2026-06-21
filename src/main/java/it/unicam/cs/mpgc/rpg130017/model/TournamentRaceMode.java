@@ -37,6 +37,11 @@ public class TournamentRaceMode implements RaceMode {
     private boolean finished     = false;
     private boolean playerWinner = false;
     private int     playerFinishPos = -1;   // 1-based finish position
+    private boolean started      = false;
+    private boolean falseStart   = false;
+    private double  greenTime    = 0;
+    private double[] aiGreenTime;
+    private double[] aiReactionTarget;
 
     public TournamentRaceMode(Player player, List<Racer> opponents) {
         this.player    = player;
@@ -48,19 +53,26 @@ public class TournamentRaceMode implements RaceMode {
         aiAccelMod    = new double[n];
         aiShiftTarget = new double[n];
         aiGear        = new int[n];
+        aiGreenTime   = new double[n];
+        aiReactionTarget = new double[n];
     }
 
     @Override
     public void start() {
         playerDistance = playerSpeed = playerRpm = 0;
-        playerGear = 1;  playerAccelMod = 1.0;
-        playerFeedback = "READY... GO!";  feedbackTimer = 1.5;
+        playerGear = 0;  playerAccelMod = 1.0;
+        playerFeedback = "WAIT FOR GREEN...";  feedbackTimer = 0;
         finished = false;  playerWinner = false;  playerFinishPos = -1;
+        started = false; falseStart = false; greenTime = 0;
 
         Arrays.fill(aiDist, 0);  Arrays.fill(aiSpeed, 0);
-        Arrays.fill(aiRpm, 0);   Arrays.fill(aiAccelMod, 1.0);
-        Arrays.fill(aiGear, 1);
-        for (int i = 0; i < opponents.size(); i++) pickAiShiftPoint(i);
+        Arrays.fill(aiRpm, 0.15);   Arrays.fill(aiAccelMod, 1.0);
+        Arrays.fill(aiGear, 0);
+        Arrays.fill(aiGreenTime, 0);
+        for (int i = 0; i < opponents.size(); i++) {
+            pickAiShiftPoint(i);
+            aiReactionTarget[i] = 0.2 + random.nextDouble() * 0.4;
+        }
     }
 
     private void pickAiShiftPoint(int i) {
@@ -71,6 +83,13 @@ public class TournamentRaceMode implements RaceMode {
     @Override
     public void update(double dt) {
         if (finished) return;
+        if (!started) {
+            // Idle revving
+            playerRpm = 0.15 + random.nextDouble() * 0.05;
+            for (int i = 0; i < opponents.size(); i++) aiRpm[i] = 0.15 + random.nextDouble() * 0.05;
+            if (feedbackTimer > 0 && (feedbackTimer -= dt) <= 0) playerFeedback = "";
+            return;
+        }
         if (feedbackTimer > 0 && (feedbackTimer -= dt) <= 0) playerFeedback = "";
 
         // ── Player ──────────────────────────────────────────────────────
@@ -78,7 +97,18 @@ public class TournamentRaceMode implements RaceMode {
         double pMax    = player.getCar().getTopSpeed() / 3.6;
         double pCapGear = pMax * getGearCap(playerGear, pMaxGears);
 
-        if (playerGear == pMaxGears) {
+        if (playerGear == 0) {
+            greenTime += dt;
+            if (falseStart && greenTime > 0.0) {
+                playerFeedback = "BAD START!";
+                playerAccelMod = 0.6;
+                feedbackTimer = 1.5;
+                playerGear = 1;
+                playerRpm = 0.2;
+            } else {
+                playerRpm = 0.15 + random.nextDouble() * 0.05;
+            }
+        } else if (playerGear == pMaxGears) {
             double speedRatio = playerSpeed / pMax;
             playerRpm = 0.65 + 0.20 * speedRatio;
             playerAccelMod = Math.max(0.1, 1.0 - Math.pow(speedRatio, 3));
@@ -88,8 +118,11 @@ public class TournamentRaceMode implements RaceMode {
             playerRpm = Math.min(1.0, playerRpm + rpmRate * dt);
             if (playerRpm >= 1.0) { playerAccelMod = 0.25; playerFeedback = "REDLINE!"; feedbackTimer = 0.3; }
         }
-        playerSpeed    = Math.min(pCapGear, playerSpeed + player.getCar().getAcceleration() * playerAccelMod * dt);
-        playerDistance += playerSpeed * dt;
+        
+        if (playerGear > 0) {
+            playerSpeed    = Math.min(pCapGear, playerSpeed + player.getCar().getAcceleration() * playerAccelMod * dt);
+            playerDistance += playerSpeed * dt;
+        }
 
         // ── AI ───────────────────────────────────────────────────────────
         for (int i = 0; i < opponents.size(); i++) {
@@ -98,7 +131,18 @@ public class TournamentRaceMode implements RaceMode {
             double oMax   = car.getTopSpeed() / 3.6;
             double oCapGear = oMax * getGearCap(aiGear[i], oMaxGears);
 
-            if (aiGear[i] == oMaxGears) {
+            if (aiGear[i] == 0) {
+                aiGreenTime[i] += dt;
+                if (aiGreenTime[i] >= aiReactionTarget[i]) {
+                    aiGear[i] = 1;
+                    aiRpm[i] = 0.3;
+                    if (aiReactionTarget[i] < 0.25) aiAccelMod[i] = 1.25;
+                    else if (aiReactionTarget[i] < 0.5) aiAccelMod[i] = 1.05;
+                    else aiAccelMod[i] = 0.8;
+                } else {
+                    aiRpm[i] = 0.15 + random.nextDouble() * 0.05;
+                }
+            } else if (aiGear[i] == oMaxGears) {
                 double speedRatio = aiSpeed[i] / oMax;
                 aiRpm[i] = 0.65 + 0.20 * speedRatio;
                 aiAccelMod[i] = Math.max(0.1, 1.0 - Math.pow(speedRatio, 3));
@@ -109,8 +153,10 @@ public class TournamentRaceMode implements RaceMode {
                 if (aiRpm[i] >= aiShiftTarget[i] || aiRpm[i] >= 1.0) shiftAi(i);
             }
 
-            aiSpeed[i] = Math.min(oCapGear, aiSpeed[i] + car.getAcceleration() * aiAccelMod[i] * dt);
-            aiDist[i] += aiSpeed[i] * dt;
+            if (aiGear[i] > 0) {
+                aiSpeed[i] = Math.min(oCapGear, aiSpeed[i] + car.getAcceleration() * aiAccelMod[i] * dt);
+                aiDist[i] += aiSpeed[i] * dt;
+            }
         }
 
         // ── Win check: finished when first crosses line ──────────────────
@@ -183,12 +229,31 @@ public class TournamentRaceMode implements RaceMode {
     @Override public double getGoodZoneEnd()      { return GOOD_END; }
     @Override public boolean isFinished()         { return finished; }
     @Override public boolean isPlayerWinner()     { return playerWinner; }
+    @Override public boolean isStarted()          { return started; }
+    @Override public void setStarted(boolean s)   { this.started = s; }
     @Override public String  getPlayerFeedback()  { return playerFeedback; }
     @Override public String  getModeName()        { return "Tournament"; }
 
     @Override
     public void shiftPlayerGear() {
         if (finished || playerRpm < 0.15) return;
+
+        if (playerGear == 0) {
+            if (!started) {
+                falseStart = true;
+                playerFeedback = "TOO EARLY!";
+                feedbackTimer = 2.0;
+            } else {
+                if (greenTime < 0.25) { playerFeedback = "PERFECT LAUNCH!"; playerAccelMod = 1.35; }
+                else if (greenTime < 0.6) { playerFeedback = "GOOD LAUNCH!"; playerAccelMod = 1.1; }
+                else { playerFeedback = "LATE LAUNCH"; playerAccelMod = 0.8; }
+                feedbackTimer = 1.5;
+                playerGear = 1;
+                playerRpm = 0.3;
+            }
+            return;
+        }
+
         if      (playerRpm >= PERFECT_START && playerRpm <= PERFECT_END) { playerFeedback = "PERFECT SHIFT!"; playerAccelMod = 1.4; }
         else if (playerRpm >= GOOD_START    && playerRpm <= GOOD_END)    { playerFeedback = "GOOD SHIFT!";    playerAccelMod = 1.1; }
         else                                                              { playerFeedback = "BAD SHIFT!";     playerAccelMod = 0.55; }
